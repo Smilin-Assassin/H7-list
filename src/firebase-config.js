@@ -5,12 +5,12 @@
 // identifier, not a secret — it's safe to commit.
 // ----------------------------------------------------------------------------
 export const firebaseConfig = {
-  apiKey: "REPLACE_ME",
-  authDomain: "REPLACE_ME.firebaseapp.com",
-  projectId: "REPLACE_ME",
-  storageBucket: "REPLACE_ME.appspot.com",
-  messagingSenderId: "REPLACE_ME",
-  appId: "REPLACE_ME",
+  apiKey: "AIzaSyA0y5DHTZCkzwZr7k47-4tYPvgp9XEx02Q",
+  authDomain: "h7-coordination.firebaseapp.com",
+  projectId: "h7-coordination",
+  storageBucket: "h7-coordination.firebasestorage.app",
+  messagingSenderId: "543033818248",
+  appId: "1:543033818248:web:445a4ac74598b191df333d",
 };
 
 // From Project settings -> Cloud Messaging -> Web configuration -> Web Push
