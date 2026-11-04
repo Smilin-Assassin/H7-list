@@ -15,7 +15,7 @@ export const firebaseConfig = {
 
 // From Project settings -> Cloud Messaging -> Web configuration -> Web Push
 // certificates ("Key pair" value). Needed for push notifications.
-export const vapidKey = "REPLACE_ME";
+export const vapidKey = "BN5gt8Y4fRDWDQ8vEUZDtVvhr3ft2Xp83A7i4QqyMCTVyENDqVdSTIv59rmnylKOU-KgT4yhg4mOF_N5wH4nxCg";
 
 // Everything in this app lives under one household document for now.
 // This matches the "just this household, pin multi-household for later" plan.
