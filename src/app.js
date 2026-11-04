@@ -22,9 +22,22 @@ function clearScreen() {
   appCleanup = null;
 }
 
-async function boot() {
-  await ensureHousehold();
+function showFatalError(err) {
+  console.error(err);
+  const app = document.getElementById("app");
+  if (!app) return;
+  app.innerHTML = `
+    <div style="padding:40px 28px;text-align:center;font-family:system-ui,sans-serif;color:#241F18">
+      <p style="font-weight:700;margin-bottom:8px">Something went wrong loading H7 List</p>
+      <p style="color:#6B6256;font-size:13px;margin-bottom:16px">${(err && err.message) ? String(err.message).replace(/</g, "&lt;") : "Unknown error"}</p>
+      <button type="button" onclick="location.reload()" style="padding:10px 20px;border-radius:10px;border:none;background:#2E6F5E;color:#fff;font-weight:700">Reload</button>
+    </div>`;
+}
 
+window.addEventListener("error", (e) => showFatalError(e.error || e));
+window.addEventListener("unhandledrejection", (e) => showFatalError(e.reason));
+
+async function boot() {
   if (isEmailLinkReturn()) {
     try {
       await completeEmailSignIn();
@@ -39,6 +52,9 @@ async function boot() {
       appCleanup = renderLogin();
       return;
     }
+    // Only touch the household doc once someone is actually signed in —
+    // Firestore's rules (correctly) refuse reads from signed-out requests.
+    await ensureHousehold();
     const profile = await getMemberProfile(user.uid);
     if (!profile) {
       appCleanup = renderOnboarding(user, () => {
