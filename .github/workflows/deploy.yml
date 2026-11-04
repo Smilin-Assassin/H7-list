@@ -14,16 +14,18 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install function dependencies
-        run: npm install --prefix functions
-
       - name: Write service account key
         run: echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/service-account.json"
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
-      - name: Deploy (hosting, firestore rules, functions)
-        run: npx firebase-tools deploy --project "$FIREBASE_PROJECT_ID" --non-interactive
+      # Cloud Functions (the push-notification fan-out in functions/) needs
+      # Firebase's Blaze plan, which isn't turned on yet — see functions/README
+      # or the main README's "About Cloud Messaging and cost" section. Once
+      # Blaze is on, change --only below back to "hosting,firestore" plus
+      # ",functions" (or just run a plain `deploy` with nothing excluded).
+      - name: Deploy (hosting, firestore rules)
+        run: npx firebase-tools deploy --project "$FIREBASE_PROJECT_ID" --only hosting,firestore --non-interactive
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/service-account.json
           FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
