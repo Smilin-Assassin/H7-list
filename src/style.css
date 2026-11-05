@@ -430,6 +430,33 @@ label {
 }
 .auth-mark span { font-size: 22px; font-weight: 700; color: var(--tag-gold); font-family: 'IBM Plex Mono', monospace; }
 
+/* --- Auth screens (login / onboarding): the mark, title, copy, action
+   and helper text move as ONE centered group. Centering just the top
+   cluster and leaving the button to trail after it is what produced a
+   dead void splitting the screen in two — centering the whole group
+   together keeps the gap symmetric, above and below, which reads as
+   intentional instead of broken. --- */
+.auth-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: var(--space-6) var(--space-6) var(--space-5);
+}
+.auth-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  text-align: center;
+}
+.auth-intro { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
+.auth-intro h1 { font-size: 22px; font-weight: 700; }
+.auth-intro p { font-size: 14px; color: var(--ink-muted); max-width: 280px; }
+.auth-action { display: flex; flex-direction: column; gap: var(--space-4); width: 100%; max-width: 320px; }
+.auth-footer { text-align: center; font-size: 11px; color: var(--ink-faint); padding-top: var(--space-4); }
+
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
