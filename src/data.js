@@ -98,6 +98,34 @@ export async function addItem({ name, category, quantity, assigneeId, costEstima
   });
 }
 
+// Bulk add: one write batch for N items, all sharing category/assignee
+// but otherwise identical to a single addItem — same "open" status, no
+// auto-splitting of quantity/cost/note per line. Those stay per-item
+// defaults the person can edit afterward, same as any other item.
+export async function addItems(items) {
+  if (!items.length) return;
+  const batch = writeBatch(db);
+  items.forEach(({ name, category, assigneeId, createdBy }) => {
+    const ref = doc(itemsCol());
+    batch.set(ref, {
+      name,
+      category,
+      quantity: 1,
+      assigneeId: assigneeId || null,
+      costEstimate: null,
+      note: "",
+      status: "open",
+      helpRequested: false,
+      batchId: null,
+      createdBy,
+      createdAt: serverTimestamp(),
+      doneBy: null,
+      doneAt: null,
+    });
+  });
+  await batch.commit();
+}
+
 export async function markItemDone(itemId, uid) {
   await updateDoc(doc(itemsCol(), itemId), {
     status: "done",
