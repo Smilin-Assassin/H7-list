@@ -1,6 +1,6 @@
 // Pattern 1 — List / Index, filtered to completed batches, plus a
 // computed reimbursement summary (equal-split assumption — see README).
-import { subscribeBatches, subscribeMembers, deleteBatch } from "../data.js";
+import { subscribeBatches, subscribeMembers, deleteBatch, updateBatchItemCost } from "../data.js";
 import { escapeHtml, formatCurrency, formatDate, showToast } from "../util.js";
 import { bottomNavHtml } from "./nav.js";
 
@@ -8,6 +8,9 @@ export function renderArchive() {
   const app = document.getElementById("app");
   let batches = null;
   let members = {};
+  // Which cleared item's price is currently open for editing, if any —
+  // at most one at a time, since it's an inline field, not a modal.
+  let editing = null; // { batchId, itemId }
 
   const unsubBatches = subscribeBatches((b) => { batches = b; paint(); });
   const unsubMembers = subscribeMembers((m) => { members = m; paint(); });
@@ -53,15 +56,32 @@ export function renderArchive() {
           </button>
         </div>
         ${summaryHtml(batch)}
-        ${batch.items.map((i) => `
-          <div class="item-row">
-            <span style="flex:1">
-              <span class="item-name is-done" style="display:block;font-size:14px">${escapeHtml(i.name)}</span>
-              <span class="item-sub">${i.doneBy ? `Bought by ${escapeHtml(memberName(i.doneBy))}` : "Marked done"}</span>
-            </span>
-            ${i.costEstimate != null ? `<span class="amount" style="font-size:13px;font-weight:700;font-family:'IBM Plex Mono',monospace">${formatCurrency(i.costEstimate)}</span>` : ""}
-          </div>
-        `).join("")}
+        ${batch.items.map((i) => itemRowHtml(batch.id, i)).join("")}
+      </div>
+    `;
+  }
+
+  function itemRowHtml(batchId, i) {
+    const isEditing = editing && editing.batchId === batchId && editing.itemId === i.id;
+    return `
+      <div class="item-row">
+        <span style="flex:1">
+          <span class="item-name is-done" style="display:block;font-size:14px">${escapeHtml(i.name)}</span>
+          <span class="item-sub">${i.doneBy ? `Bought by ${escapeHtml(memberName(i.doneBy))}` : "Marked done"}</span>
+        </span>
+        ${isEditing ? `
+          <span style="display:flex;align-items:center;gap:6px">
+            <input type="text" inputmode="decimal" class="cost-edit-input" data-cost-input="${i.id}"
+              value="${i.costEstimate != null ? i.costEstimate : ""}" placeholder="0.00"
+              style="width:72px;font-family:'IBM Plex Mono',monospace;font-size:13px" autofocus>
+            <button type="button" class="btn-text" data-save-cost="${batchId}:${i.id}" style="font-size:12px">Save</button>
+          </span>
+        ` : `
+          <button type="button" class="btn-text" data-edit-cost="${batchId}:${i.id}"
+            style="font-size:13px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--ink)">
+            ${i.costEstimate != null ? formatCurrency(i.costEstimate) : "Add price"}
+          </button>
+        `}
       </div>
     `;
   }
@@ -75,7 +95,7 @@ export function renderArchive() {
         <div class="empty-wrap">
           <div class="empty-state">
             <p class="empty-title">Nothing cleared yet</p>
-            <p>Once everything on the board is checked off, the round lands here with a cost summary.</p>
+            <p>Once you mark bought items as paid on the board, they land here with a cost summary.</p>
           </div>
         </div>`;
     }
@@ -114,6 +134,47 @@ export function renderArchive() {
         }
       });
     });
+
+    app.querySelectorAll("[data-edit-cost]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const [batchId, itemId] = btn.dataset.editCost.split(":");
+        editing = { batchId, itemId };
+        paint();
+        const input = app.querySelector(`[data-cost-input="${itemId}"]`);
+        if (input) { input.focus(); input.select(); }
+      });
+    });
+
+    app.querySelectorAll("[data-cost-input]").forEach((input) => {
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") saveCostEdit(input.dataset.costInput);
+        if (e.key === "Escape") { editing = null; paint(); }
+      });
+    });
+
+    app.querySelectorAll("[data-save-cost]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const [, itemId] = btn.dataset.saveCost.split(":");
+        saveCostEdit(itemId);
+      });
+    });
+  }
+
+  async function saveCostEdit(itemId) {
+    if (!editing || editing.itemId !== itemId) return;
+    const { batchId } = editing;
+    const input = app.querySelector(`[data-cost-input="${itemId}"]`);
+    const raw = input ? input.value.trim() : "";
+    const parsed = raw ? parseFloat(raw) : null;
+    const costEstimate = Number.isFinite(parsed) ? parsed : null;
+    editing = null;
+    try {
+      await updateBatchItemCost(batchId, itemId, costEstimate);
+      showToast("Price updated.");
+    } catch (err) {
+      showToast("Couldn't update that price — check your connection and try again.");
+    }
+    paint();
   }
 
   paint();

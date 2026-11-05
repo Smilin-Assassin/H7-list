@@ -70,6 +70,30 @@ export async function setFinanceLead(uid) {
   await updateDoc(householdRef(), { financeLeadId: uid });
 }
 
+// Remove a member profile — e.g. a duplicate created by signing in again
+// on a different device/browser (anonymous auth gives each one its own
+// uid). Items that reference this uid (assigneeId/doneBy) are left as-is;
+// every screen already falls back to "Someone"/"?" for an unknown member,
+// so nothing breaks, it just reads a little more anonymously after this.
+export async function deleteMember(uid) {
+  // Update the household doc *before* deleting the member doc: its
+  // write rule requires the caller to currently be a member, and if
+  // you're removing your own (duplicate) profile, deleting it first
+  // would fail that check on the household update right after.
+  const household = householdRef();
+  const snap = await getDoc(household);
+  const data = snap.data() || {};
+  const memberIds = Array.isArray(data.memberIds) ? data.memberIds : [];
+  const remaining = memberIds.filter((id) => id !== uid);
+  const patch = { memberIds: remaining };
+  if (data.financeLeadId === uid) {
+    patch.financeLeadId = remaining[0] || null;
+  }
+  await setDoc(household, patch, { merge: true });
+
+  await deleteDoc(doc(membersCol(), uid));
+}
+
 // ---- Items -------------------------------------------------------------
 
 export function subscribeItems(cb) {
@@ -161,16 +185,17 @@ export async function deleteItem(itemId) {
   await deleteDoc(doc(itemsCol(), itemId));
 }
 
-// When every item in the current cycle is done, sweep them into a new
-// archive batch together. No computed reimbursement/split here — just a
-// record of what was bought and who bought it; archive.js shows per-person
-// totals straight from `items` on read. Called after any item is marked
-// done.
-export async function archiveIfCycleComplete(allItems, members) {
-  const current = allItems.filter((i) => !i.batchId);
+// Sweep whichever items are currently marked "done" into a new Cleared
+// batch, leaving any still-open items on the board untouched. This is an
+// explicit action (the "Mark as paid" button), not automatic — a round
+// only moves to the archive once someone says it's actually settled, so
+// a list that happens to end up fully ticked off doesn't silently vanish
+// before anyone's been paid back. No computed reimbursement/split here —
+// just a record of what was bought and who bought it; archive.js shows
+// per-person totals straight from `items` on read.
+export async function markCurrentAsPaid(allItems) {
+  const current = allItems.filter((i) => !i.batchId && i.status === "done");
   if (current.length === 0) return;
-  const stillOpen = current.some((i) => i.status !== "done");
-  if (stillOpen) return;
 
   const batch = writeBatch(db);
   const batchRef = doc(batchesCol());
@@ -217,4 +242,27 @@ export async function deleteBatch(batchId) {
   itemsSnap.forEach((d) => batch.delete(d.ref));
   batch.delete(doc(batchesCol(), batchId));
   await batch.commit();
+}
+
+// Correct a cleared item's price after the fact (a typo, a receipt that
+// turned up later). The batch doc's own `items` snapshot is what the
+// archive screen reads and totals from, so that's the source of truth to
+// rewrite; the original item doc is updated too, best-effort, in case
+// anything else still reads it.
+export async function updateBatchItemCost(batchId, itemId, costEstimate) {
+  const batchRef = doc(batchesCol(), batchId);
+  const snap = await getDoc(batchRef);
+  if (!snap.exists()) return;
+  const data = snap.data();
+  const items = (data.items || []).map((i) => (
+    i.id === itemId ? { ...i, costEstimate } : i
+  ));
+  const total = items.reduce((sum, i) => sum + (i.costEstimate || 0), 0);
+  await updateDoc(batchRef, { items, total });
+  try {
+    await updateDoc(doc(itemsCol(), itemId), { costEstimate });
+  } catch {
+    // Item may have been deleted separately — the batch snapshot is the
+    // one that matters for the archive screen, so this is non-fatal.
+  }
 }

@@ -1,7 +1,7 @@
 // Pattern 1 — List / Index, read as a duty board: ruled category
 // row-groups, one laminated name tag per row. See the direction
 // contract in .impeccable/surfaces/src-views-home-js.md.
-import { subscribeItems, subscribeMembers, markItemDone, markItemOpen, requestHelp, archiveIfCycleComplete } from "../data.js";
+import { subscribeItems, subscribeMembers, markItemDone, markItemOpen, requestHelp, markCurrentAsPaid } from "../data.js";
 import { CATEGORIES, categoryLabel, categoryColor, memberTagColor, escapeHtml, showToast, formatCurrency } from "../util.js";
 import { bottomNavHtml } from "./nav.js";
 import { navigate } from "../router.js";
@@ -12,13 +12,8 @@ export function renderHome(currentUser) {
   let members = {};
   let activeFilter = "all";
 
-  let unsubItems = subscribeItems((list) => { items = list; paint(); maybeArchive(); });
+  let unsubItems = subscribeItems((list) => { items = list; paint(); });
   let unsubMembers = subscribeMembers((m) => { members = m; paint(); });
-
-  function maybeArchive() {
-    if (!items) return;
-    archiveIfCycleComplete(items, members).catch(() => {});
-  }
 
   function visibleItems() {
     const current = (items || []).filter((i) => !i.batchId);
@@ -87,14 +82,20 @@ export function renderHome(currentUser) {
 
   function ledgerHtml() {
     const current = (items || []).filter((i) => !i.batchId);
-    const spent = current.filter((i) => i.status === "done" && i.costEstimate != null)
+    const doneItems = current.filter((i) => i.status === "done");
+    const spent = doneItems.filter((i) => i.costEstimate != null)
       .reduce((sum, i) => sum + i.costEstimate, 0);
     const openCount = current.filter((i) => i.status !== "done").length;
     return `
       <div class="ledger-strip">
-        <span class="ledger-label">${openCount === 0 ? "Board clear" : `${openCount} open`}</span>
+        <span class="ledger-label">${openCount === 0 && current.length > 0 ? "All bought" : openCount === 0 ? "Board clear" : `${openCount} open`}</span>
         <span class="ledger-amount">${spent > 0 ? `Spent so far ${formatCurrency(spent)}` : "Rf 0.00 logged"}</span>
       </div>
+      ${doneItems.length > 0 ? `
+        <button type="button" id="mark-paid" class="btn btn-secondary" style="width:100%;margin-top:var(--space-2)">
+          Mark ${doneItems.length} bought item${doneItems.length === 1 ? "" : "s"} as paid${spent > 0 ? ` — ${formatCurrency(spent)}` : ""}
+        </button>
+      ` : ""}
     `;
   }
 
@@ -155,6 +156,20 @@ export function renderHome(currentUser) {
     if (emptyAdd) emptyAdd.addEventListener("click", () => navigate("/add"));
     const notif = document.getElementById("notif-btn");
     if (notif) notif.addEventListener("click", () => navigate("/me"));
+
+    const markPaid = document.getElementById("mark-paid");
+    if (markPaid) {
+      markPaid.addEventListener("click", async () => {
+        markPaid.disabled = true;
+        try {
+          await markCurrentAsPaid(items || []);
+          showToast("Marked as paid — moved to Cleared rounds.");
+        } catch (err) {
+          markPaid.disabled = false;
+          showToast("Couldn't mark that as paid — check your connection and try again.");
+        }
+      });
+    }
 
     app.querySelectorAll("[data-filter]").forEach((el) => {
       el.addEventListener("click", () => { activeFilter = el.dataset.filter; paint(); });

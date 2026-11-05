@@ -19,6 +19,9 @@ service cloud.firestore {
         allow read: if isSignedIn();
         allow create: if isSignedIn() && request.auth.uid == memberId;
         allow update: if isSignedIn() && request.auth.uid == memberId;
+        // Any current household member can remove a member profile —
+        // e.g. a duplicate from signing in again on another device.
+        allow delete: if isMember(householdId);
 
         match /tokens/{tokenId} {
           allow read, write: if isSignedIn() && request.auth.uid == memberId;

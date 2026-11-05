@@ -1,5 +1,5 @@
 // Pattern 5 — Settings. One job: manage your own profile & notifications.
-import { subscribeMembers, subscribeHousehold, setFinanceLead } from "../data.js";
+import { subscribeMembers, subscribeHousehold, setFinanceLead, deleteMember } from "../data.js";
 import { memberTagColor, escapeHtml, showToast } from "../util.js";
 import { bottomNavHtml } from "./nav.js";
 import { enableNotifications } from "../push.js";
@@ -24,6 +24,7 @@ export function renderMe(currentUser) {
           <span class="item-sub">${isLead ? "Handles finances" : ""}</span>
         </span>
         ${!isLead ? `<button type="button" class="btn-text" data-make-lead="${uid}" style="font-size:12px">Make finance lead</button>` : ""}
+        <button type="button" class="btn-text" data-remove-member="${uid}" style="font-size:12px;color:var(--danger)">Remove</button>
       </div>
     `;
   }
@@ -72,6 +73,21 @@ export function renderMe(currentUser) {
     app.querySelectorAll("[data-make-lead]").forEach((el) => {
       el.addEventListener("click", async () => {
         await setFinanceLead(el.dataset.makeLead);
+      });
+    });
+    app.querySelectorAll("[data-remove-member]").forEach((el) => {
+      el.addEventListener("click", async () => {
+        const uid = el.dataset.removeMember;
+        const name = members?.[uid]?.displayName || "this member";
+        if (!window.confirm(`Remove ${name} from H7? This can't be undone.`)) return;
+        el.disabled = true;
+        try {
+          await deleteMember(uid);
+          showToast(`${name} removed.`);
+        } catch (err) {
+          el.disabled = false;
+          showToast("Couldn't remove that — check your connection and try again.");
+        }
       });
     });
   }
