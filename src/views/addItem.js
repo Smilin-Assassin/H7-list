@@ -61,7 +61,7 @@ export function renderAddItem(currentUser) {
             <span style="width:40px"></span>
           </div>
 
-          <div class="content" style="padding-bottom:24px">
+          <div class="content" style="padding-top:var(--space-5);padding-bottom:24px">
             <div class="field">
               <label for="iname">Item name</label>
               <input id="iname" type="text" placeholder="e.g. Milk (2L)" value="${escapeHtml(form.name)}" aria-invalid="${!!nameError}">
