@@ -245,25 +245,15 @@ label {
   flex-direction: column;
 }
 
-/* Ruled-board texture: only the Duty Board and Cleared (archive) list
-   screens, where it reads as "an unfilled board". On a form or profile
-   screen it would run lines straight through labels and inputs instead,
-   so it's a separate modifier class, not part of .content itself. */
+/* Ruled-board texture — removed. The repeating lines were fixed at
+   47px regardless of what sat in front of them (item rows, headers,
+   the settlement card all have different heights), so the rule lines
+   never actually lined up with row edges or text baselines — they just
+   cut across things at arbitrary points. Rather than keep chasing that
+   alignment, the board is a flat surface now; .ruled-board is kept as
+   a class (still referenced in the view JS) but does nothing. */
 .ruled-board {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent,
-    transparent 47px,
-    var(--rule) 47px,
-    var(--rule) 48px
-  );
-  background-position: 0 0;
-  /* On a short list the rules used to repeat all the way to the bottom
-     of the viewport, so one item on an otherwise-empty board produced a
-     few hundred pixels of unexplained ruled void under it. Fade the
-     texture out after a few rows instead of letting it run forever. */
-  -webkit-mask-image: linear-gradient(to bottom, black 0, black 420px, transparent 620px);
-  mask-image: linear-gradient(to bottom, black 0, black 420px, transparent 620px);
+  background-image: none;
 }
 
 .empty-wrap {
