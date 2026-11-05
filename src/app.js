@@ -37,6 +37,19 @@ function showFatalError(err) {
 window.addEventListener("error", (e) => showFatalError(e.error || e));
 window.addEventListener("unhandledrejection", (e) => showFatalError(e.reason));
 
+// First paint, before anything async even starts — signing in and the
+// first Firestore round trip take a moment, and a blank board reads as
+// frozen. This replaces itself the instant watchAuth fires.
+(function showBootLoading() {
+  const app = document.getElementById("app");
+  if (!app) return;
+  app.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:100vh;background:#132A26">
+      <div style="width:34px;height:34px;border-radius:50%;border:3px solid rgba(243,247,245,0.18);border-top-color:#E3A72F;animation:h7spin .8s linear infinite"></div>
+      <style>@keyframes h7spin{to{transform:rotate(360deg)}}</style>
+    </div>`;
+})();
+
 async function boot() {
   if (isEmailLinkReturn()) {
     try {
@@ -54,8 +67,9 @@ async function boot() {
     }
     // Only touch the household doc once someone is actually signed in —
     // Firestore's rules (correctly) refuse reads from signed-out requests.
-    await ensureHousehold();
-    const profile = await getMemberProfile(user.uid);
+    // The two reads don't depend on each other, so run them together
+    // instead of waiting on one network round trip then the next.
+    const [, profile] = await Promise.all([ensureHousehold(), getMemberProfile(user.uid)]);
     if (!profile) {
       appCleanup = renderOnboarding(user, () => {
         clearScreen();

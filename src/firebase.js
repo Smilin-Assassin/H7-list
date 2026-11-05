@@ -15,7 +15,9 @@ import {
   signOut,
 } from "firebase/auth";
 import {
-  getFirestore,
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
   doc,
   collection,
   onSnapshot,
@@ -40,7 +42,14 @@ import { firebaseConfig } from "./firebase-config.js";
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+// A persistent local (IndexedDB) cache means a returning visit can often
+// show data straight from disk while Firestore reconnects in the
+// background, instead of every open waiting on a fresh network round
+// trip. persistentMultipleTabManager so it still works with the PWA and
+// a browser tab open at the same time.
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+});
 
 export {
   RecaptchaVerifier,
