@@ -59,9 +59,11 @@ export function renderArchive() {
     }
     if (batches.length === 0) {
       return `
-        <div class="empty-state">
-          <p class="empty-title">Nothing cleared yet</p>
-          <p>Once everything on the board is checked off, the round lands here with a cost summary.</p>
+        <div class="empty-wrap">
+          <div class="empty-state">
+            <p class="empty-title">Nothing cleared yet</p>
+            <p>Once everything on the board is checked off, the round lands here with a cost summary.</p>
+          </div>
         </div>`;
     }
     return batches.map(batchHtml).join("");

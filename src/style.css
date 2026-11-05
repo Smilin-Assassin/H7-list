@@ -225,6 +225,24 @@ label {
   padding: 0 var(--space-6) 100px;
   display: flex;
   flex-direction: column;
+  /* The board is ruled even where nothing is written yet — empty
+     space reads as an unfilled board, never as a layout gap. */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 47px,
+    var(--rule) 47px,
+    var(--rule) 48px
+  );
+  background-position: 0 0;
+}
+
+.empty-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
 }
 
 /* --- Category row-group: tab + ruled rows, no card --- */
@@ -331,9 +349,10 @@ label {
 
 .empty-state {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: var(--space-2); padding: var(--space-8) var(--space-4); text-align: center;
+  gap: var(--space-2); padding: var(--space-8) var(--space-5); text-align: center;
   color: var(--ink-faint); border: 1px dashed var(--rule-strong); border-radius: var(--radius-md);
-  margin-top: var(--space-5);
+  background: var(--board);
+  max-width: 320px;
 }
 .empty-state p { font-size: 14px; }
 .empty-state .empty-title { font-size: 15px; font-weight: 600; color: var(--ink); }

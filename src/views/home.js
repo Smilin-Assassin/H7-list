@@ -111,10 +111,12 @@ export function renderHome(currentUser) {
     const list = visibleItems();
     if (list.length === 0) {
       return `
-        <div class="empty-state">
-          <p class="empty-title">Board's clear</p>
-          <p>Add something the household needs — groceries, supplies, a repair.</p>
-          <button type="button" id="empty-add" class="btn btn-primary" style="width:auto;margin-top:8px">Add an item</button>
+        <div class="empty-wrap">
+          <div class="empty-state">
+            <p class="empty-title">Board's clear</p>
+            <p>Add something the household needs — groceries, supplies, a repair.</p>
+            <button type="button" id="empty-add" class="btn btn-primary" style="width:auto;margin-top:8px">Add an item</button>
+          </div>
         </div>`;
     }
     const groups = groupByCategory(list);
