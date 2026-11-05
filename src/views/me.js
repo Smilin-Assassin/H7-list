@@ -7,7 +7,7 @@ import { enableNotifications } from "../push.js";
 
 export function renderMe(currentUser) {
   const app = document.getElementById("app");
-  let members = {};
+  let members = null; // null = still loading, distinct from a genuinely empty household
   let household = null;
 
   const unsubMembers = subscribeMembers((m) => { members = m; paint(); });
@@ -29,8 +29,14 @@ export function renderMe(currentUser) {
     `;
   }
 
-  function paint() {
+  function membersHtml() {
+    if (members === null) return `<div class="skeleton"></div><div class="skeleton"></div>`;
     const ids = Object.keys(members);
+    if (ids.length === 0) return '<p style="font-size:13px;color:var(--ink-faint)">No one has joined yet.</p>';
+    return ids.map(memberRow).join("");
+  }
+
+  function paint() {
     app.innerHTML = `
       <div class="screen">
         <div class="topbar" style="display:block">
@@ -40,7 +46,7 @@ export function renderMe(currentUser) {
         <div class="content">
           <div class="cat-group">
             <p class="list-label">Household members</p>
-            ${ids.length ? ids.map(memberRow).join("") : '<p style="font-size:13px;color:var(--ink-faint)">No one has joined yet.</p>'}
+            ${membersHtml()}
           </div>
 
           <div class="cat-group" style="gap:12px">

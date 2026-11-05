@@ -5,7 +5,7 @@ import { navigate } from "../router.js";
 
 export function renderAddItem(currentUser) {
   const app = document.getElementById("app");
-  let members = {};
+  let members = null; // null = still loading, distinct from a genuinely empty household
   let unsubMembers = subscribeMembers((m) => { members = m; paint(); });
 
   const form = {
@@ -20,6 +20,7 @@ export function renderAddItem(currentUser) {
   let saving = false;
 
   function memberChipsHtml() {
+    if (members === null) return `<div style="display:flex;gap:10px"><div class="skeleton" style="width:44px;height:44px;border-radius:999px;margin-top:0"></div><div class="skeleton" style="width:44px;height:44px;border-radius:999px;margin-top:0"></div><div class="skeleton" style="width:44px;height:44px;border-radius:999px;margin-top:0"></div></div>`;
     const ids = Object.keys(members);
     if (ids.length === 0) return `<p style="font-size:13px;color:var(--ink-faint)">No one's joined the household yet.</p>`;
     return `

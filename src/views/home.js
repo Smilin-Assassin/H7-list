@@ -131,7 +131,7 @@ export function renderHome(currentUser) {
             <p class="mark">H7</p>
             <h1>Duty board</h1>
           </div>
-          <button type="button" class="icon-btn" aria-label="Notifications" id="notif-btn">
+          <button type="button" class="icon-btn" aria-label="Notification settings" id="notif-btn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 10-12 0c0 3.5-1 5-2 7h16c-1-2-2-3.5-2-7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 19a2.5 2.5 0 005 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           </button>
         </div>
@@ -153,6 +153,8 @@ export function renderHome(currentUser) {
     if (fab) fab.addEventListener("click", () => navigate("/add"));
     const emptyAdd = document.getElementById("empty-add");
     if (emptyAdd) emptyAdd.addEventListener("click", () => navigate("/add"));
+    const notif = document.getElementById("notif-btn");
+    if (notif) notif.addEventListener("click", () => navigate("/me"));
 
     app.querySelectorAll("[data-filter]").forEach((el) => {
       el.addEventListener("click", () => { activeFilter = el.dataset.filter; paint(); });

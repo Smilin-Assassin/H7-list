@@ -25,7 +25,6 @@
   /* State */
   --done-ink: #8FBB9A;
   --flare: #FF8A4C;
-  --flare-ink: #2A1200;
   --danger: #FF8D74;
   --danger-strong: #FF6A4A;
 
@@ -35,12 +34,14 @@
   --cat-maintenance: #D9713C;
   --cat-other: #B79FE0;
 
-  /* Name-tag palette — cycled per person, independent of category */
-  --tag-1: #5AA9E6;
-  --tag-2: #FF8A4C;
-  --tag-3: #8FBB9A;
-  --tag-4: #E3A72F;
-  --tag-5: #B79FE0;
+  /* Name-tag palette — cycled per person, independent of category.
+     Deliberately distinct from --tag-gold, --flare, and --done-ink so a
+     person's tag never reads as the CTA, a help flag, or a done mark. */
+  --tag-1: #6FB8E0;
+  --tag-2: #E8916B;
+  --tag-3: #7FC4A0;
+  --tag-4: #D8C35A;
+  --tag-5: #B08FD6;
 
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -71,12 +72,18 @@ h1, h2, h3, p { margin: 0; }
 
 button, input, textarea, select { font-family: inherit; }
 
-a { color: var(--tag-gold); }
+a { color: var(--tag-gold); text-underline-offset: 2px; }
 a:hover { color: #F0BE56; }
 
 button { cursor: pointer; background: none; border: none; color: inherit; }
 
 ::selection { background: var(--tag-gold); color: var(--tag-gold-ink); }
+
+/* Scrollbars carry the board too, not the browser's default chrome. */
+* { scrollbar-color: var(--rule-strong) transparent; scrollbar-width: thin; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: var(--rule-strong); border-radius: 999px; }
 
 /* Visible focus ring everywhere — never remove outline without replacing it */
 a:focus-visible,
@@ -217,7 +224,9 @@ label {
   background: transparent;
   color: var(--ink-muted);
 }
+.chip:hover { border-color: var(--ink-muted); color: var(--ink); }
 .chip[aria-pressed="true"] { background: var(--tag-gold); border-color: var(--tag-gold); color: var(--tag-gold-ink); }
+.chip[aria-pressed="true"]:hover { border-color: var(--tag-gold); color: var(--tag-gold-ink); }
 
 .content {
   flex: 1;
