@@ -1,4 +1,4 @@
-import { watchAuth, isEmailLinkReturn, completeEmailSignIn } from "./auth.js";
+import { watchAuth } from "./auth.js";
 import { ensureHousehold, getMemberProfile } from "./data.js";
 import { renderLogin } from "./views/login.js";
 import { renderOnboarding } from "./views/onboarding.js";
@@ -51,14 +51,6 @@ window.addEventListener("unhandledrejection", (e) => showFatalError(e.reason));
 })();
 
 async function boot() {
-  if (isEmailLinkReturn()) {
-    try {
-      await completeEmailSignIn();
-    } catch (err) {
-      console.error("Email link sign-in failed", err);
-    }
-  }
-
   watchAuth(async (user) => {
     clearScreen();
     if (!user) {

@@ -6,11 +6,7 @@
 import { initializeApp } from "firebase/app";
 import {
   getAuth,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  isSignInWithEmailLink,
-  sendSignInLinkToEmail,
-  signInWithEmailLink,
+  signInAnonymously,
   onAuthStateChanged,
   signOut,
 } from "firebase/auth";
@@ -52,11 +48,7 @@ export const db = initializeFirestore(app, {
 });
 
 export {
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  isSignInWithEmailLink,
-  sendSignInLinkToEmail,
-  signInWithEmailLink,
+  signInAnonymously,
   onAuthStateChanged,
   signOut,
   doc,
