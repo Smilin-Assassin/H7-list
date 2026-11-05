@@ -9,9 +9,33 @@ import { renderMe } from "./views/me.js";
 import { registerRoute, registerOverlay, startRouter } from "./router.js";
 
 if ("serviceWorker" in navigator) {
+  // sw.js calls self.skipWaiting()/clients.claim() unconditionally, so a
+  // freshly-deployed worker takes over an already-open tab in the
+  // background, without asking — the person just keeps running whatever
+  // JS already loaded into memory until they reload. "controllerchange"
+  // fires the moment that takeover happens, which is the hook for the
+  // banner. It also fires on the very first install ever (nothing was
+  // running before, so nothing to "update" from) — hadController,
+  // captured before registration, is what tells those two cases apart.
+  const hadController = !!navigator.serviceWorker.controller;
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/sw.js").catch(() => {});
   });
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!hadController) return;
+    showUpdateBanner();
+  });
+}
+
+function showUpdateBanner() {
+  if (document.getElementById("h7-update-banner")) return;
+  const el = document.createElement("button");
+  el.type = "button";
+  el.id = "h7-update-banner";
+  el.className = "update-banner";
+  el.textContent = "Update available — tap to reload";
+  el.addEventListener("click", () => window.location.reload());
+  document.body.appendChild(el);
 }
 
 let appCleanup = null;
