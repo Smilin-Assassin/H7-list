@@ -350,6 +350,14 @@ label {
 }
 .tag-btn[aria-pressed="true"] { background: var(--tag-color, var(--tag-1)); color: #10211D; border-color: var(--tag-color, var(--tag-1)); }
 
+/* "Unassigned" sits in the same row as the 44px round tag-btn avatars
+   (New item → Assign to), but it's a plain .chip, which is only about
+   30px tall with its normal padding — the row read as two different
+   heights side by side. Match the avatars' height here specifically,
+   without touching .chip everywhere else it's used (category filters,
+   archive tabs), which are fine at their own height. */
+.chip[data-assignee=""] { height: 44px; display: inline-flex; align-items: center; }
+
 .flare-btn {
   width: 28px; height: 28px; flex-shrink: 0; border-radius: var(--radius-tag);
   display: flex; align-items: center; justify-content: center; color: var(--flare);

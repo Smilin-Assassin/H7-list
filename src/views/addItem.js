@@ -46,20 +46,20 @@ export function renderAddItem(currentUser) {
         </div>
 
         <div class="content" style="padding-bottom:24px">
-          <div class="field" style="margin:0">
+          <div class="field">
             <label for="iname">Item name</label>
             <input id="iname" type="text" placeholder="e.g. Milk (2L)" value="${escapeHtml(form.name)}" aria-invalid="${!!nameError}">
             ${nameError ? `<p class="field-error" role="alert">${escapeHtml(nameError)}</p>` : ""}
           </div>
 
-          <div class="field" style="margin:0">
+          <div class="field">
             <span class="field-label">Category</span>
             <div style="display:flex;flex-wrap:wrap;gap:8px">
               ${CATEGORIES.map((c) => `<button type="button" class="chip" data-category="${c.id}" aria-pressed="${form.category === c.id}">${c.label}</button>`).join("")}
             </div>
           </div>
 
-          <div class="field" style="margin:0">
+          <div class="field">
             <span class="field-label">Quantity</span>
             <div class="stepper">
               <button type="button" id="qty-minus" aria-label="Decrease quantity">-</button>
@@ -68,12 +68,12 @@ export function renderAddItem(currentUser) {
             </div>
           </div>
 
-          <div class="field" style="margin:0">
+          <div class="field">
             <span class="field-label">Assign to</span>
             ${memberChipsHtml()}
           </div>
 
-          <div class="field" style="margin:0">
+          <div class="field">
             <label for="cost">Estimated cost (optional)</label>
             <div class="money-input">
               <span class="prefix">Rf</span>
@@ -81,7 +81,7 @@ export function renderAddItem(currentUser) {
             </div>
           </div>
 
-          <div class="field" style="margin:0">
+          <div class="field">
             <label for="note">Note (optional)</label>
             <textarea id="note" placeholder="Any details…" style="height:64px;resize:none">${escapeHtml(form.note)}</textarea>
           </div>
