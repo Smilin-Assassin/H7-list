@@ -54,3 +54,14 @@ export function categoryLabel(id) {
 export function categoryColor(id) {
   return CATEGORIES.find((c) => c.id === id)?.color || "var(--cat-other)";
 }
+
+// Every household member gets a laminated name-tag color, stable across
+// sessions — picked from the tag palette by a cheap hash of their uid so
+// it never has to be chosen or stored.
+const TAG_PALETTE = ["var(--tag-1)", "var(--tag-2)", "var(--tag-3)", "var(--tag-4)", "var(--tag-5)"];
+export function memberTagColor(uid) {
+  if (!uid) return TAG_PALETTE[0];
+  let hash = 0;
+  for (let i = 0; i < uid.length; i++) hash = (hash * 31 + uid.charCodeAt(i)) >>> 0;
+  return TAG_PALETTE[hash % TAG_PALETTE.length];
+}

@@ -17,11 +17,9 @@ function render() {
   app.innerHTML = `
     <div class="screen" style="padding:48px 32px 40px">
       <div style="flex-grow:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
-        <div style="width:64px;height:64px;border-radius:16px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center">
-          <span style="font-size:24px;font-weight:700;color:var(--accent)">H7</span>
-        </div>
-        <h1 style="margin:14px 0 0;font-size:24px;font-weight:700">H7 List</h1>
-        <p style="margin:0;font-size:14px;color:var(--ink-muted);text-align:center;max-width:260px">Shared shopping &amp; tasks list for the apartment</p>
+        <div class="auth-mark"><span>H7</span></div>
+        <h1 style="margin:14px 0 0;font-size:22px;font-weight:700">Duty board</h1>
+        <p style="margin:0;font-size:14px;color:var(--ink-muted);text-align:center;max-width:260px">Shared shopping &amp; tasks board for the apartment</p>
       </div>
 
       <div style="display:flex;flex-direction:column;gap:20px">
@@ -29,7 +27,7 @@ function render() {
         ${state.error ? `<p class="field-error" role="alert" style="text-align:center">${state.error}</p>` : ""}
       </div>
 
-      <p style="margin:24px 0 0;font-size:11px;color:var(--ink-faint);text-align:center">H7 Coordination · household of 5</p>
+      <p style="margin:24px 0 0;font-size:11px;color:var(--ink-faint);text-align:center">H7 · household of 5</p>
       <div id="recaptcha-container"></div>
     </div>
   `;
@@ -38,11 +36,11 @@ function render() {
 
 function renderEnterStep() {
   return `
-    <div role="tablist" aria-label="Sign in method" style="display:flex;background:#EFEAE0;border-radius:12px;padding:4px;gap:4px">
+    <div role="tablist" aria-label="Sign in method" style="display:flex;background:var(--board-sunken);border:1px solid var(--rule-strong);border-radius:10px;padding:4px;gap:4px">
       <button type="button" id="tab-phone" role="tab" aria-selected="${state.method === "phone"}"
-        style="flex:1;min-height:40px;border:none;background:${state.method === "phone" ? "#FFFFFF" : "transparent"};color:${state.method === "phone" ? "var(--ink)" : "var(--ink-muted)"};font-weight:600;font-size:14px;border-radius:9px">Phone</button>
+        style="flex:1;min-height:40px;border:none;background:${state.method === "phone" ? "var(--tag-gold)" : "transparent"};color:${state.method === "phone" ? "var(--tag-gold-ink)" : "var(--ink-muted)"};font-weight:700;font-size:14px;border-radius:7px">Phone</button>
       <button type="button" id="tab-email" role="tab" aria-selected="${state.method === "email"}"
-        style="flex:1;min-height:40px;border:none;background:${state.method === "email" ? "#FFFFFF" : "transparent"};color:${state.method === "email" ? "var(--ink)" : "var(--ink-muted)"};font-weight:600;font-size:14px;border-radius:9px">Email</button>
+        style="flex:1;min-height:40px;border:none;background:${state.method === "email" ? "var(--tag-gold)" : "transparent"};color:${state.method === "email" ? "var(--tag-gold-ink)" : "var(--ink-muted)"};font-weight:700;font-size:14px;border-radius:7px">Email</button>
     </div>
 
     ${state.method === "phone" ? `

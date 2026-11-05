@@ -1,6 +1,6 @@
 // Pattern 3 — Form. One job: enter a new item.
 import { subscribeMembers, addItem } from "../data.js";
-import { CATEGORIES, escapeHtml, showToast } from "../util.js";
+import { CATEGORIES, memberTagColor, escapeHtml, showToast } from "../util.js";
 import { navigate } from "../router.js";
 
 export function renderAddItem(currentUser) {
@@ -25,7 +25,7 @@ export function renderAddItem(currentUser) {
     return `
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         ${ids.map((uid) => `
-          <button type="button" class="avatar-btn" data-assignee="${uid}" aria-pressed="${form.assigneeId === uid}" aria-label="${escapeHtml(members[uid].displayName)}${form.assigneeId === uid ? ', selected' : ''}">
+          <button type="button" class="tag-btn" style="--tag-color:${memberTagColor(uid)}" data-assignee="${uid}" aria-pressed="${form.assigneeId === uid}" aria-label="${escapeHtml(members[uid].displayName)}${form.assigneeId === uid ? ', selected' : ''}">
             ${escapeHtml(members[uid].initial)}
           </button>`).join("")}
         <button type="button" class="chip" data-assignee="" aria-pressed="${form.assigneeId === null}">Unassigned</button>
@@ -52,14 +52,14 @@ export function renderAddItem(currentUser) {
           </div>
 
           <div class="field" style="margin:0">
-            <span style="display:block;font-size:13px;font-weight:600;color:var(--ink-muted);margin-bottom:8px">Category</span>
+            <span class="field-label">Category</span>
             <div style="display:flex;flex-wrap:wrap;gap:8px">
               ${CATEGORIES.map((c) => `<button type="button" class="chip" data-category="${c.id}" aria-pressed="${form.category === c.id}">${c.label}</button>`).join("")}
             </div>
           </div>
 
           <div class="field" style="margin:0">
-            <span style="display:block;font-size:13px;font-weight:600;color:var(--ink-muted);margin-bottom:8px">Quantity</span>
+            <span class="field-label">Quantity</span>
             <div class="stepper">
               <button type="button" id="qty-minus" aria-label="Decrease quantity">-</button>
               <span id="qty-value" style="font-size:15px;font-weight:600;min-width:16px;text-align:center">${form.quantity}</span>
@@ -68,15 +68,15 @@ export function renderAddItem(currentUser) {
           </div>
 
           <div class="field" style="margin:0">
-            <span style="display:block;font-size:13px;font-weight:600;color:var(--ink-muted);margin-bottom:8px">Assign to</span>
+            <span class="field-label">Assign to</span>
             ${memberChipsHtml()}
           </div>
 
           <div class="field" style="margin:0">
             <label for="cost">Estimated cost (optional)</label>
-            <div style="display:flex;align-items:center;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);padding:0 14px">
-              <span style="font-size:14px;color:var(--ink-faint);margin-right:6px">Rf</span>
-              <input id="cost" type="text" inputmode="decimal" placeholder="0.00" value="${escapeHtml(form.cost)}" style="border:none;padding:13px 0">
+            <div class="money-input">
+              <span class="prefix">Rf</span>
+              <input id="cost" type="text" inputmode="decimal" placeholder="0.00" value="${escapeHtml(form.cost)}">
             </div>
           </div>
 

@@ -1,6 +1,8 @@
-// Pattern 1 — List / Index. One job: scan the shared list and manage it.
+// Pattern 1 — List / Index, read as a duty board: ruled category
+// row-groups, one laminated name tag per row. See the direction
+// contract in .impeccable/surfaces/src-views-home-js.md.
 import { subscribeItems, subscribeMembers, markItemDone, markItemOpen, requestHelp, archiveIfCycleComplete } from "../data.js";
-import { CATEGORIES, categoryLabel, categoryColor, escapeHtml, showToast } from "../util.js";
+import { CATEGORIES, categoryLabel, categoryColor, memberTagColor, escapeHtml, showToast, formatCurrency } from "../util.js";
 import { bottomNavHtml } from "./nav.js";
 import { navigate } from "../router.js";
 
@@ -46,36 +48,52 @@ export function renderHome(currentUser) {
   function itemRowHtml(item) {
     const done = item.status === "done";
     const assigneeLabel = item.assigneeId
-      ? `Assigned to ${escapeHtml(memberName(item.assigneeId))}`
+      ? `On ${escapeHtml(memberName(item.assigneeId))}`
       : "Unassigned";
     const subLabel = done ? `Bought by ${escapeHtml(memberName(item.doneBy))}` : assigneeLabel;
+    const canAskHelp = !done && item.assigneeId && item.assigneeId === currentUser.uid && !item.helpRequested;
     return `
-      <button type="button" class="item-row ${done ? "is-done" : ""}" data-item-id="${item.id}" data-action="toggle">
-        <span class="checkbox-circle ${done ? "is-checked" : ""}" aria-hidden="true">
-          ${done ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ""}
-        </span>
-        <span style="flex:1;text-align:left">
+      <div class="item-row">
+        <button type="button" class="checkbox-square ${done ? "is-checked" : ""}" data-item-id="${item.id}" data-action="toggle" aria-label="${done ? "Mark not bought" : "Mark bought"}">
+          ${done ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="#132A26" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ""}
+        </button>
+        <button type="button" style="flex:1;text-align:left;min-width:0" data-item-id="${item.id}" data-action="toggle">
           <span class="item-name ${done ? "is-done" : ""}" style="display:block">${escapeHtml(item.name)}${item.quantity > 1 ? ` ×${item.quantity}` : ""}</span>
-          <span class="item-sub" style="display:block">${subLabel}</span>
-          ${!done && item.assigneeId && item.assigneeId === currentUser.uid && !item.helpRequested ? `
-            <span><button type="button" class="btn-text" style="font-size:11px;padding:0;margin-top:4px" data-item-id="${item.id}" data-action="help">Ask for help</button></span>
-          ` : ""}
-          ${item.helpRequested && !done ? `<span class="badge-help">Asked for help</span>` : ""}
-        </span>
-        ${item.assigneeId ? `<span class="avatar" aria-hidden="true">${escapeHtml(memberInitial(item.assigneeId))}</span>` : ""}
-      </button>
+          <span class="item-sub" style="display:block">${subLabel}${item.costEstimate != null ? ` · ${formatCurrency(item.costEstimate)}` : ""}</span>
+          ${item.helpRequested && !done ? `<span class="flare-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l1.2 7.2L20 12l-6.8 2.8L12 22l-1.2-7.2L4 12l6.8-2.8L12 2z" fill="currentColor"/></svg>Needs a hand</span>` : ""}
+        </button>
+        ${canAskHelp ? `
+          <button type="button" class="flare-btn" data-item-id="${item.id}" data-action="help" aria-label="Ask for help with this">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l1.2 7.2L20 12l-6.8 2.8L12 22l-1.2-7.2L4 12l6.8-2.8L12 2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          </button>
+        ` : ""}
+        ${item.assigneeId ? `<span class="tag" style="--tag-color:${memberTagColor(item.assigneeId)}" aria-hidden="true">${escapeHtml(memberInitial(item.assigneeId))}</span>` : ""}
+      </div>
     `;
   }
 
   function sectionHtml(categoryId, list) {
     if (list.length === 0) return "";
     return `
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <div class="section-label">
-          <span class="dot" style="background:${categoryColor(categoryId)}"></span>
+      <div class="cat-group">
+        <div class="cat-tab" style="--cat-color:${categoryColor(categoryId)}">
+          <span class="cat-dot"></span>
           ${categoryLabel(categoryId)}
         </div>
         ${list.map(itemRowHtml).join("")}
+      </div>
+    `;
+  }
+
+  function ledgerHtml() {
+    const current = (items || []).filter((i) => !i.batchId);
+    const spent = current.filter((i) => i.status === "done" && i.costEstimate != null)
+      .reduce((sum, i) => sum + i.costEstimate, 0);
+    const openCount = current.filter((i) => i.status !== "done").length;
+    return `
+      <div class="ledger-strip">
+        <span class="ledger-label">${openCount === 0 ? "Board clear" : `${openCount} open`}</span>
+        <span class="ledger-amount">${spent > 0 ? `Spent so far ${formatCurrency(spent)}` : "Rf 0.00 logged"}</span>
       </div>
     `;
   }
@@ -94,7 +112,7 @@ export function renderHome(currentUser) {
     if (list.length === 0) {
       return `
         <div class="empty-state">
-          <p style="font-size:15px;font-weight:600;color:var(--ink)">Nothing on the list right now</p>
+          <p class="empty-title">Board's clear</p>
           <p>Add something the household needs — groceries, supplies, a repair.</p>
           <button type="button" id="empty-add" class="btn btn-primary" style="width:auto;margin-top:8px">Add an item</button>
         </div>`;
@@ -108,17 +126,19 @@ export function renderHome(currentUser) {
       <div class="screen">
         <div class="topbar">
           <div>
-            <p class="eyebrow">H7</p>
-            <h1>Shared list</h1>
+            <p class="mark">H7</p>
+            <h1>Duty board</h1>
           </div>
           <button type="button" class="icon-btn" aria-label="Notifications" id="notif-btn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 10-12 0c0 3.5-1 5-2 7h16c-1-2-2-3.5-2-7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9.5 19a2.5 2.5 0 005 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 10-12 0c0 3.5-1 5-2 7h16c-1-2-2-3.5-2-7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 19a2.5 2.5 0 005 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           </button>
         </div>
+        ${ledgerHtml()}
         <div class="chip-row">${chipsHtml()}</div>
         <div class="content">${contentHtml()}</div>
-        <button type="button" class="fab" aria-label="Add item" id="fab-add">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/></svg>
+        <button type="button" class="cta-tag" aria-label="Add item" id="fab-add">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+          Add
         </button>
         ${bottomNavHtml("list")}
       </div>
@@ -137,8 +157,7 @@ export function renderHome(currentUser) {
     });
 
     app.querySelectorAll('[data-action="toggle"]').forEach((el) => {
-      el.addEventListener("click", async (e) => {
-        if (e.target.closest('[data-action="help"]')) return;
+      el.addEventListener("click", async () => {
         const id = el.dataset.itemId;
         const item = (items || []).find((i) => i.id === id);
         if (!item) return;

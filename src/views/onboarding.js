@@ -10,11 +10,9 @@ export function renderOnboarding(user, onDone) {
     app.innerHTML = `
       <div class="screen" style="padding:48px 32px 40px">
         <div style="flex-grow:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
-          <div style="width:64px;height:64px;border-radius:16px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center">
-            <span style="font-size:24px;font-weight:700;color:var(--accent)">H7</span>
-          </div>
-          <h1 style="margin:14px 0 0;font-size:22px;font-weight:700">What should we call you?</h1>
-          <p style="margin:0;font-size:14px;color:var(--ink-muted);text-align:center;max-width:280px">This is how you'll show up on the shared list.</p>
+          <div class="auth-mark"><span>H7</span></div>
+          <h1 style="margin:14px 0 0;font-size:21px;font-weight:700">What should we call you?</h1>
+          <p style="margin:0;font-size:14px;color:var(--ink-muted);text-align:center;max-width:280px">This is how your tag will read on the board.</p>
         </div>
         <div style="display:flex;flex-direction:column;gap:20px">
           <div class="field" style="margin:0">
