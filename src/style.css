@@ -4,26 +4,32 @@
    a committed enamel board, ruled into category groups, with a
    laminated name-tag chip on every row. See .impeccable/surfaces/
    src-views-home-js.md for the full direction contract.
+
+   Board material is warm charcoal/graphite, not the earlier teal —
+   a neutral, almost-black warm grey rather than a colored board, with
+   the gold tag as the only real color note. --done-ink was dropped
+   from sage green to a muted warm taupe for the same reason: no green
+   anywhere in the palette now, including accents.
 --------------------------------------------------------------------- */
 :root {
   /* Board */
-  --board: #132A26;
-  --board-raised: #1B3A33;
-  --board-sunken: #0E211D;
-  --rule: rgba(243, 247, 245, 0.14);
-  --rule-strong: rgba(243, 247, 245, 0.24);
+  --board: #1E1A17;
+  --board-raised: #2B2521;
+  --board-sunken: #141110;
+  --rule: rgba(245, 238, 230, 0.12);
+  --rule-strong: rgba(245, 238, 230, 0.22);
 
   /* Ink (on the board) */
-  --ink: #F4F7F5;
-  --ink-muted: #C3D4CC;
-  --ink-faint: #9AB0A8;
+  --ink: #F5F0EA;
+  --ink-muted: #C7BDB2;
+  --ink-faint: #998C7F;
 
   /* Primary action — the laminated tag itself */
   --tag-gold: #E3A72F;
   --tag-gold-ink: #1F1402;
 
   /* State */
-  --done-ink: #8FBB9A;
+  --done-ink: #A89885;
   --flare: #FF8A4C;
   --danger: #FF8D74;
   --danger-strong: #FF6A4A;
@@ -39,7 +45,7 @@
      person's tag never reads as the CTA, a help flag, or a done mark. */
   --tag-1: #6FB8E0;
   --tag-2: #E8916B;
-  --tag-3: #7FC4A0;
+  --tag-3: #D18B99;
   --tag-4: #D8C35A;
   --tag-5: #B08FD6;
 
