@@ -55,7 +55,7 @@ export function renderHome(currentUser) {
     return `
       <div class="item-row">
         <button type="button" class="checkbox-square ${done ? "is-checked" : ""}" data-item-id="${item.id}" data-action="toggle" aria-label="${done ? "Mark not bought" : "Mark bought"}">
-          ${done ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="#132A26" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ""}
+          ${done ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="var(--board-sunken)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ""}
         </button>
         <button type="button" style="flex:1;text-align:left;min-width:0" data-item-id="${item.id}" data-action="toggle">
           <span class="item-name ${done ? "is-done" : ""}" style="display:block">${escapeHtml(item.name)}${item.quantity > 1 ? ` ×${item.quantity}` : ""}</span>

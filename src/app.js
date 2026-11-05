@@ -44,8 +44,8 @@ window.addEventListener("unhandledrejection", (e) => showFatalError(e.reason));
   const app = document.getElementById("app");
   if (!app) return;
   app.innerHTML = `
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:100vh;background:#132A26">
-      <div style="width:34px;height:34px;border-radius:50%;border:3px solid rgba(243,247,245,0.18);border-top-color:#E3A72F;animation:h7spin .8s linear infinite"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:100vh;background:var(--board, #1E1A17)">
+      <div style="width:34px;height:34px;border-radius:50%;border:3px solid rgba(245,238,230,0.18);border-top-color:#E3A72F;animation:h7spin .8s linear infinite"></div>
       <style>@keyframes h7spin{to{transform:rotate(360deg)}}</style>
     </div>`;
 })();
