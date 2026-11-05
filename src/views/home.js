@@ -57,7 +57,7 @@ export function renderHome(currentUser) {
         <button type="button" class="checkbox-square ${done ? "is-checked" : ""}" data-item-id="${item.id}" data-action="toggle" aria-label="${done ? "Mark not bought" : "Mark bought"}">
           ${done ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="var(--board-sunken)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ""}
         </button>
-        <button type="button" style="flex:1;text-align:left;min-width:0" data-item-id="${item.id}" data-action="toggle">
+        <button type="button" style="flex:1;text-align:left;min-width:0" data-item-id="${item.id}" data-action="edit">
           <span class="item-name ${done ? "is-done" : ""}" style="display:block">${escapeHtml(item.name)}${item.quantity > 1 ? ` ×${item.quantity}` : ""}</span>
           <span class="item-sub" style="display:block">${subLabel}${item.costEstimate != null ? ` · ${formatCurrency(item.costEstimate)}` : ""}</span>
           ${item.helpRequested && !done ? `<span class="flare-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l1.2 7.2L20 12l-6.8 2.8L12 22l-1.2-7.2L4 12l6.8-2.8L12 2z" fill="currentColor"/></svg>Needs a hand</span>` : ""}
@@ -175,6 +175,10 @@ export function renderHome(currentUser) {
           showToast("Couldn't update that item — try again.");
         }
       });
+    });
+
+    app.querySelectorAll('[data-action="edit"]').forEach((el) => {
+      el.addEventListener("click", () => navigate("/edit/" + el.dataset.itemId));
     });
 
     app.querySelectorAll('[data-action="help"]').forEach((el) => {

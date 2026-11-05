@@ -28,10 +28,13 @@ service cloud.firestore {
       match /items/{itemId} {
         allow read: if isMember(householdId);
         allow create: if isMember(householdId) && request.resource.data.createdBy == request.auth.uid;
+        // update covers both normal field edits (data.js updateItem) and
+        // deleting a whole cleared round (data.js deleteBatch) sweeping
+        // batchId onto every item in it.
         allow update: if isMember(householdId);
-        // Deleting an item only happens as part of deleting the whole
-        // cleared round it belongs to (data.js deleteBatch) — any
-        // member can do that, same as they can mark items done.
+        // delete covers both removing a single item (data.js deleteItem,
+        // from the edit-item screen) and deleteBatch wiping every item
+        // that was swept into a cleared round being removed.
         allow delete: if isMember(householdId);
       }
 

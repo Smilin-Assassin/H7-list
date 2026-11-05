@@ -23,6 +23,32 @@ export function registerOverlay(path, renderFn) {
   overlays[path] = renderFn;
 }
 
+// Matches a concrete path like "/edit/abc123" against registered overlay
+// patterns, which may contain ":param" segments (e.g. "/edit/:id"). Exact
+// string keys (no colon) still work exactly as before — this only adds
+// param support on top, it doesn't change existing behavior.
+function matchOverlay(path) {
+  if (overlays[path]) return { renderFn: overlays[path], params: {} };
+  const pathParts = path.split("/");
+  for (const pattern of Object.keys(overlays)) {
+    if (!pattern.includes(":")) continue;
+    const patternParts = pattern.split("/");
+    if (patternParts.length !== pathParts.length) continue;
+    const params = {};
+    let ok = true;
+    for (let i = 0; i < patternParts.length; i++) {
+      if (patternParts[i].startsWith(":")) {
+        params[patternParts[i].slice(1)] = decodeURIComponent(pathParts[i]);
+      } else if (patternParts[i] !== pathParts[i]) {
+        ok = false;
+        break;
+      }
+    }
+    if (ok) return { renderFn: overlays[pattern], params };
+  }
+  return null;
+}
+
 export function setGuard(fn) {
   guard = fn;
 }
@@ -58,7 +84,8 @@ async function renderCurrent() {
     }
   }
 
-  if (overlays[path]) {
+  const overlayMatch = matchOverlay(path);
+  if (overlayMatch) {
     if (currentBasePath === null) {
       // Deep link / refresh landed directly on an overlay path (e.g.
       // #/add) with nothing mounted yet — give the overlay a base
@@ -70,7 +97,7 @@ async function renderCurrent() {
     // The base screen underneath stays exactly as it is — only the
     // overlay mounts/remounts.
     if (overlayCleanup) await closeOverlay();
-    overlayCleanup = await overlays[path]();
+    overlayCleanup = await overlayMatch.renderFn(overlayMatch.params);
     return;
   }
 

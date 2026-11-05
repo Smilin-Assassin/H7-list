@@ -2,7 +2,7 @@
 // (households/h7) for now — see firebase-config.js HOUSEHOLD_ID.
 import {
   db, doc, collection, onSnapshot, query, orderBy, where, addDoc, updateDoc,
-  getDocs, getDoc, setDoc, writeBatch, serverTimestamp,
+  deleteDoc, getDocs, getDoc, setDoc, writeBatch, serverTimestamp,
 } from "./firebase.js";
 import { HOUSEHOLD_ID } from "./firebase-config.js";
 
@@ -144,6 +144,21 @@ export async function markItemOpen(itemId) {
 
 export async function requestHelp(itemId) {
   await updateDoc(doc(itemsCol(), itemId), { helpRequested: true });
+}
+
+export async function getItem(itemId) {
+  const snap = await getDoc(doc(itemsCol(), itemId));
+  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+}
+
+// Partial update from the edit-item form. Only the fields the form
+// actually sends get touched — callers pass exactly what changed.
+export async function updateItem(itemId, fields) {
+  await updateDoc(doc(itemsCol(), itemId), fields);
+}
+
+export async function deleteItem(itemId) {
+  await deleteDoc(doc(itemsCol(), itemId));
 }
 
 // When every item in the current cycle is done, sweep them into a new

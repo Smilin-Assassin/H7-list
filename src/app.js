@@ -4,6 +4,7 @@ import { renderLogin } from "./views/login.js";
 import { renderOnboarding } from "./views/onboarding.js";
 import { renderHome } from "./views/home.js";
 import { renderAddItem } from "./views/addItem.js";
+import { renderEditItem } from "./views/editItem.js";
 import { renderArchive } from "./views/archive.js";
 import { renderMe } from "./views/me.js";
 import { registerRoute, registerOverlay, startRouter } from "./router.js";
@@ -102,6 +103,7 @@ function startAppRoutes(user) {
   if (!routesStarted) {
     registerRoute("/", () => renderHome(user));
     registerOverlay("/add", () => renderAddItem(user));
+    registerOverlay("/edit/:id", (params) => renderEditItem(user, params.id));
     registerRoute("/archive", () => renderArchive());
     registerRoute("/me", () => renderMe(user));
     registerRoute("/404", () => renderHome(user));
