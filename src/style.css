@@ -258,6 +258,12 @@ label {
     var(--rule) 48px
   );
   background-position: 0 0;
+  /* On a short list the rules used to repeat all the way to the bottom
+     of the viewport, so one item on an otherwise-empty board produced a
+     few hundred pixels of unexplained ruled void under it. Fade the
+     texture out after a few rows instead of letting it run forever. */
+  -webkit-mask-image: linear-gradient(to bottom, black 0, black 420px, transparent 620px);
+  mask-image: linear-gradient(to bottom, black 0, black 420px, transparent 620px);
 }
 
 .empty-wrap {
@@ -270,7 +276,7 @@ label {
 
 /* --- Category row-group: tab + ruled rows, no card --- */
 .cat-group { display: flex; flex-direction: column; }
-.cat-group + .cat-group { margin-top: var(--space-5); }
+.cat-group + .cat-group { margin-top: var(--space-6); padding-top: var(--space-5); border-top: 1px solid var(--rule-strong); }
 
 .cat-tab {
   display: inline-flex;
@@ -411,8 +417,12 @@ label {
 
 /* --- Settlement block: the ledger math, set in mono like a receipt --- */
 .ledger-block {
-  padding: var(--space-4) 0; border-top: 1px solid var(--rule-strong); border-bottom: 1px solid var(--rule-strong);
+  padding: var(--space-4) var(--space-3); border-top: 1px solid var(--rule-strong); border-bottom: 1px solid var(--rule-strong);
   display: flex; flex-direction: column; gap: 10px; margin: var(--space-3) 0;
+  /* Opaque, unlike the ruled board behind it — the settlement numbers
+     need to read clearly, not have board rules cutting through them. */
+  background: var(--board);
+  border-radius: var(--radius-sm);
 }
 .ledger-block .row { display: flex; justify-content: space-between; font-size: 14px; }
 .ledger-block .row .amount { font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
@@ -426,8 +436,14 @@ label {
 
 .field-label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-muted); margin-bottom: var(--space-2); }
 .money-input { display: flex; align-items: center; border: 1px solid var(--rule-strong); border-radius: var(--radius-sm); background: var(--board-sunken); padding: 0 14px; }
+.money-input:focus-within { box-shadow: var(--focus-ring); border-color: var(--tag-gold); }
 .money-input .prefix { font-size: 14px; color: var(--ink-faint); margin-right: 6px; font-family: 'IBM Plex Mono', monospace; }
 .money-input input { border: none; padding: 13px 0; background: transparent; }
+/* The focus ring lives on the wrapper now (above), so the bare <input>
+   inside it must not also draw its own ring — otherwise you get two
+   misaligned boxes: a full one around "Rf 65" and a second one hugging
+   only the digits, offset to the right of the "Rf" prefix. */
+.money-input input:focus-visible { box-shadow: none; }
 
 .auth-mark {
   width: 64px; height: 64px; border-radius: var(--radius-md); background: var(--board-raised);
