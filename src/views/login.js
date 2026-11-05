@@ -169,7 +169,11 @@ function friendlyAuthError(err) {
   if (code === "auth/invalid-verification-code") return "That code didn't match — check and try again.";
   if (code === "auth/too-many-requests") return "Too many attempts — wait a bit before trying again.";
   if (code === "auth/code-expired") return "That code expired — request a new one.";
-  return "Something went wrong. Please try again.";
+  // Anything else: show the actual code instead of a dead-end generic
+  // message, so whoever's looking at this screen (or a screenshot of it)
+  // can tell what's actually wrong instead of guessing.
+  const detail = code || (err && err.message) || "unknown error";
+  return `Something went wrong (${detail}). Please try again.`;
 }
 
 export function renderLogin() {
