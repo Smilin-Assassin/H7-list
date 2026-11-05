@@ -1,7 +1,9 @@
 // Central place that boots Firebase and exports the SDK pieces the rest of
-// the app uses. Loaded straight from Google's CDN as ES modules — no build
-// step needed.
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+// the app uses. Imported from the npm "firebase" package (see package.json)
+// so the build step can bundle it into dist/app.js — one file, one request,
+// instead of the browser fetching the SDK live from Google's CDN in several
+// pieces on every cold load.
+import { initializeApp } from "firebase/app";
 import {
   getAuth,
   RecaptchaVerifier,
@@ -11,7 +13,7 @@ import {
   signInWithEmailLink,
   onAuthStateChanged,
   signOut,
-} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+} from "firebase/auth";
 import {
   getFirestore,
   doc,
@@ -26,13 +28,13 @@ import {
   setDoc,
   writeBatch,
   serverTimestamp,
-} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+} from "firebase/firestore";
 import {
   getMessaging,
   getToken,
   onMessage,
   isSupported as isMessagingSupported,
-} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js";
+} from "firebase/messaging";
 
 import { firebaseConfig } from "./firebase-config.js";
 

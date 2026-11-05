@@ -14,6 +14,12 @@ jobs:
         with:
           node-version: 20
 
+      # Bundles the Firebase SDK and all of src/ into one dist/app.js
+      # instead of the browser fetching a dozen small files (several of
+      # them live from Google's CDN) on every cold load.
+      - name: Install dependencies and build
+        run: npm install && npm run build
+
       - name: Write service account key
         run: echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/service-account.json"
         env:
