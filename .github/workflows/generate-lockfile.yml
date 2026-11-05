@@ -1,0 +1,36 @@
+name: Generate package-lock.json (one-off)
+
+# Manual-only. Run once from the Actions tab (or `gh workflow run`) to
+# produce a committed package-lock.json, then this file can be deleted —
+# it exists because the sandbox used to edit this repo has no network
+# access to the npm registry, but GitHub's own runners do.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  lockfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate lockfile only (no scripts, no install)
+        run: npm install --package-lock-only
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet -- package-lock.json; then
+            echo "No changes to package-lock.json"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "Add package-lock.json for reproducible builds"
+          git push
