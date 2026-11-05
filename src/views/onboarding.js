@@ -39,7 +39,6 @@ export function renderOnboarding(user, onDone) {
         await createMemberProfile(user.uid, {
           displayName: name,
           initial: initialOf(name),
-          contact: user.phoneNumber || user.email || "",
         });
         onDone();
       } catch (err) {

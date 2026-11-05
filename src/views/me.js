@@ -1,6 +1,5 @@
 // Pattern 5 — Settings. One job: manage your own profile & notifications.
 import { subscribeMembers, subscribeHousehold, setFinanceLead } from "../data.js";
-import { logOut } from "../auth.js";
 import { memberTagColor, escapeHtml, showToast } from "../util.js";
 import { bottomNavHtml } from "./nav.js";
 import { enableNotifications } from "../push.js";
@@ -54,8 +53,6 @@ export function renderMe(currentUser) {
             <button type="button" id="enable-push" class="btn btn-secondary">Turn on push notifications</button>
             <p style="margin:10px 0 0;font-size:12px;color:var(--ink-faint)">On iPhone, add this app to your home screen first (Share &rarr; Add to Home Screen) — otherwise push won't arrive.</p>
           </div>
-
-          <button type="button" id="sign-out" class="btn btn-secondary" style="margin-top:var(--space-5)">Sign out</button>
         </div>
         ${bottomNavHtml("me")}
       </div>
@@ -64,7 +61,6 @@ export function renderMe(currentUser) {
   }
 
   function attachHandlers() {
-    document.getElementById("sign-out").addEventListener("click", () => logOut());
     document.getElementById("enable-push").addEventListener("click", async () => {
       try {
         await enableNotifications(currentUser.uid);

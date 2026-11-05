@@ -8,7 +8,6 @@ import {
   getAuth,
   signInAnonymously,
   onAuthStateChanged,
-  signOut,
 } from "firebase/auth";
 import {
   initializeFirestore,
@@ -50,7 +49,6 @@ export const db = initializeFirestore(app, {
 export {
   signInAnonymously,
   onAuthStateChanged,
-  signOut,
   doc,
   collection,
   onSnapshot,

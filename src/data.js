@@ -32,11 +32,10 @@ export async function getMemberProfile(uid) {
   return snap.exists() ? { id: uid, ...snap.data() } : null;
 }
 
-export async function createMemberProfile(uid, { displayName, initial, contact }) {
+export async function createMemberProfile(uid, { displayName, initial }) {
   await setDoc(doc(membersCol(), uid), {
     displayName,
     initial,
-    contact,
     joinedAt: serverTimestamp(),
   });
   const household = householdRef();
