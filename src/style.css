@@ -431,6 +431,43 @@ label {
   border-top: 1px solid var(--rule-strong); background: var(--board-raised);
 }
 
+/* --- Modal sheet: New item (and anything else routed through
+   registerOverlay) renders here instead of taking over #app, so the
+   screen underneath stays mounted, visible, and blurred behind it. --- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(10, 8, 6, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+.modal-backdrop.is-open { opacity: 1; }
+
+.modal-sheet {
+  width: 100%;
+  max-width: 480px;
+  max-height: min(88vh, 720px);
+  display: flex;
+  flex-direction: column;
+  background: var(--board);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  box-shadow: 0 -16px 40px rgba(0, 0, 0, 0.5);
+  overflow: hidden; /* clips header/content/footer to the rounded top corners */
+  transform: translateY(100%);
+  transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.modal-sheet.is-open { transform: translateY(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-backdrop, .modal-sheet { transition: none; }
+}
+
 /* --- Settlement block: the ledger math, set in mono like a receipt --- */
 .ledger-block {
   padding: var(--space-4) var(--space-3); border-top: 1px solid var(--rule-strong); border-bottom: 1px solid var(--rule-strong);

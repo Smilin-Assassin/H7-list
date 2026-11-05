@@ -6,7 +6,7 @@ import { renderHome } from "./views/home.js";
 import { renderAddItem } from "./views/addItem.js";
 import { renderArchive } from "./views/archive.js";
 import { renderMe } from "./views/me.js";
-import { registerRoute, startRouter } from "./router.js";
+import { registerRoute, registerOverlay, startRouter } from "./router.js";
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
@@ -77,7 +77,7 @@ let routesStarted = false;
 function startAppRoutes(user) {
   if (!routesStarted) {
     registerRoute("/", () => renderHome(user));
-    registerRoute("/add", () => renderAddItem(user));
+    registerOverlay("/add", () => renderAddItem(user));
     registerRoute("/archive", () => renderArchive());
     registerRoute("/me", () => renderMe(user));
     registerRoute("/404", () => renderHome(user));

@@ -1,10 +1,14 @@
-// Pattern 3 — Form. One job: enter a new item.
+// Pattern 3 — Form, shown as a modal sheet over whatever screen is
+// already open (usually the Duty Board) rather than a full-page
+// navigation — see registerOverlay in router.js. The screen behind it
+// stays mounted and live the whole time; this just layers a blurred
+// backdrop + sheet on top and tears itself down on close.
 import { subscribeMembers, addItem } from "../data.js";
 import { CATEGORIES, memberTagColor, escapeHtml, showToast } from "../util.js";
 import { navigate } from "../router.js";
 
 export function renderAddItem(currentUser) {
-  const app = document.getElementById("app");
+  const root = document.getElementById("modal-root");
   let members = null; // null = still loading, distinct from a genuinely empty household
   let unsubMembers = subscribeMembers((m) => { members = m; paint(); });
 
@@ -18,6 +22,16 @@ export function renderAddItem(currentUser) {
   };
   let nameError = "";
   let saving = false;
+  let hasOpened = false; // true once the open transition has run, so later
+                          // re-paints (every keystroke) don't replay it
+
+  const prevBodyOverflow = document.body.style.overflow;
+  document.body.style.overflow = "hidden";
+
+  function onKeydown(e) {
+    if (e.key === "Escape") navigate("/");
+  }
+  document.addEventListener("keydown", onKeydown);
 
   function memberChipsHtml() {
     if (members === null) return `<div style="display:flex;gap:10px"><div class="skeleton" style="width:44px;height:44px;border-radius:999px;margin-top:0"></div><div class="skeleton" style="width:44px;height:44px;border-radius:999px;margin-top:0"></div><div class="skeleton" style="width:44px;height:44px;border-radius:999px;margin-top:0"></div></div>`;
@@ -35,68 +49,88 @@ export function renderAddItem(currentUser) {
   }
 
   function paint() {
-    app.innerHTML = `
-      <div class="screen">
-        <div class="sheet-header">
-          <button type="button" class="icon-btn" aria-label="Close" id="close-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          </button>
-          <h1>New item</h1>
-          <span style="width:40px"></span>
-        </div>
-
-        <div class="content" style="padding-bottom:24px">
-          <div class="field">
-            <label for="iname">Item name</label>
-            <input id="iname" type="text" placeholder="e.g. Milk (2L)" value="${escapeHtml(form.name)}" aria-invalid="${!!nameError}">
-            ${nameError ? `<p class="field-error" role="alert">${escapeHtml(nameError)}</p>` : ""}
+    const openCls = hasOpened ? " is-open" : "";
+    root.innerHTML = `
+      <div class="modal-backdrop${openCls}" id="modal-backdrop">
+        <div class="modal-sheet${openCls}" role="dialog" aria-modal="true" aria-labelledby="add-item-title">
+          <div class="sheet-header">
+            <button type="button" class="icon-btn" aria-label="Close" id="close-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+            <h1 id="add-item-title">New item</h1>
+            <span style="width:40px"></span>
           </div>
 
-          <div class="field">
-            <span class="field-label">Category</span>
-            <div style="display:flex;flex-wrap:wrap;gap:8px">
-              ${CATEGORIES.map((c) => `<button type="button" class="chip" data-category="${c.id}" aria-pressed="${form.category === c.id}">${c.label}</button>`).join("")}
+          <div class="content" style="padding-bottom:24px">
+            <div class="field">
+              <label for="iname">Item name</label>
+              <input id="iname" type="text" placeholder="e.g. Milk (2L)" value="${escapeHtml(form.name)}" aria-invalid="${!!nameError}">
+              ${nameError ? `<p class="field-error" role="alert">${escapeHtml(nameError)}</p>` : ""}
+            </div>
+
+            <div class="field">
+              <span class="field-label">Category</span>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                ${CATEGORIES.map((c) => `<button type="button" class="chip" data-category="${c.id}" aria-pressed="${form.category === c.id}">${c.label}</button>`).join("")}
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="field-label">Quantity</span>
+              <div class="stepper">
+                <button type="button" id="qty-minus" aria-label="Decrease quantity">-</button>
+                <span id="qty-value" style="font-size:15px;font-weight:600;min-width:16px;text-align:center">${form.quantity}</span>
+                <button type="button" id="qty-plus" aria-label="Increase quantity">+</button>
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="field-label">Assign to</span>
+              ${memberChipsHtml()}
+            </div>
+
+            <div class="field">
+              <label for="cost">Estimated cost (optional)</label>
+              <div class="money-input">
+                <span class="prefix">Rf</span>
+                <input id="cost" type="text" inputmode="decimal" placeholder="0.00" value="${escapeHtml(form.cost)}">
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="note">Note (optional)</label>
+              <textarea id="note" placeholder="Any details…" style="height:64px;resize:none">${escapeHtml(form.note)}</textarea>
             </div>
           </div>
 
-          <div class="field">
-            <span class="field-label">Quantity</span>
-            <div class="stepper">
-              <button type="button" id="qty-minus" aria-label="Decrease quantity">-</button>
-              <span id="qty-value" style="font-size:15px;font-weight:600;min-width:16px;text-align:center">${form.quantity}</span>
-              <button type="button" id="qty-plus" aria-label="Increase quantity">+</button>
-            </div>
+          <div class="sheet-footer">
+            <button type="button" id="submit-item" class="btn btn-primary" ${saving ? "disabled" : ""}>${saving ? "Adding…" : "Add to list"}</button>
           </div>
-
-          <div class="field">
-            <span class="field-label">Assign to</span>
-            ${memberChipsHtml()}
-          </div>
-
-          <div class="field">
-            <label for="cost">Estimated cost (optional)</label>
-            <div class="money-input">
-              <span class="prefix">Rf</span>
-              <input id="cost" type="text" inputmode="decimal" placeholder="0.00" value="${escapeHtml(form.cost)}">
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="note">Note (optional)</label>
-            <textarea id="note" placeholder="Any details…" style="height:64px;resize:none">${escapeHtml(form.note)}</textarea>
-          </div>
-        </div>
-
-        <div class="sheet-footer">
-          <button type="button" id="submit-item" class="btn btn-primary" ${saving ? "disabled" : ""}>${saving ? "Adding…" : "Add to list"}</button>
         </div>
       </div>
     `;
     attachHandlers();
+
+    if (!hasOpened) {
+      requestAnimationFrame(() => {
+        const backdrop = document.getElementById("modal-backdrop");
+        if (!backdrop) return;
+        backdrop.classList.add("is-open");
+        const sheet = backdrop.querySelector(".modal-sheet");
+        if (sheet) sheet.classList.add("is-open");
+        hasOpened = true;
+      });
+    }
   }
 
   function attachHandlers() {
     document.getElementById("close-btn").addEventListener("click", () => navigate("/"));
+
+    // Close on a tap/click that lands on the dimmed backdrop itself,
+    // not one that bubbled up from inside the sheet.
+    document.getElementById("modal-backdrop").addEventListener("click", (e) => {
+      if (e.target.id === "modal-backdrop") navigate("/");
+    });
 
     const nameInput = document.getElementById("iname");
     nameInput.addEventListener("input", () => { form.name = nameInput.value; });
@@ -117,10 +151,10 @@ export function renderAddItem(currentUser) {
       document.getElementById("qty-value").textContent = form.quantity;
     });
 
-    app.querySelectorAll("[data-category]").forEach((el) => {
+    root.querySelectorAll("[data-category]").forEach((el) => {
       el.addEventListener("click", () => { form.category = el.dataset.category; paint(); });
     });
-    app.querySelectorAll("[data-assignee]").forEach((el) => {
+    root.querySelectorAll("[data-assignee]").forEach((el) => {
       el.addEventListener("click", () => { form.assigneeId = el.dataset.assignee || null; paint(); });
     });
 
@@ -157,5 +191,11 @@ export function renderAddItem(currentUser) {
   }
 
   paint();
-  return () => { unsubMembers(); };
+
+  return () => {
+    unsubMembers();
+    document.removeEventListener("keydown", onKeydown);
+    document.body.style.overflow = prevBodyOverflow;
+    root.innerHTML = "";
+  };
 }

@@ -115,7 +115,7 @@ export function renderHome(currentUser) {
           <div class="empty-state">
             <p class="empty-title">Board's clear</p>
             <p>Add something the household needs — groceries, supplies, a repair.</p>
-            <button type="button" id="empty-add" class="btn btn-primary" style="width:auto;margin-top:8px">Add an item</button>
+            <button type="button" id="empty-add" class="btn btn-primary" style="width:auto">Add an item</button>
           </div>
         </div>`;
     }

@@ -51,7 +51,7 @@ export function renderMe(currentUser) {
           <div class="cat-group" style="gap:12px">
             <p class="list-label">Notifications</p>
             <button type="button" id="enable-push" class="btn btn-secondary">Turn on push notifications</button>
-            <p style="margin:10px 0 0;font-size:12px;color:var(--ink-faint)">On iPhone, add this app to your home screen first (Share &rarr; Add to Home Screen) — otherwise push won't arrive.</p>
+            <p style="margin:0;font-size:12px;color:var(--ink-faint)">On iPhone, add this app to your home screen first (Share &rarr; Add to Home Screen) — otherwise push won't arrive.</p>
           </div>
         </div>
         ${bottomNavHtml("me")}
