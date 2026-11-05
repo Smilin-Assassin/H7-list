@@ -164,12 +164,11 @@ label {
 .icon-btn:hover { border-color: var(--rule-strong); color: var(--ink); }
 
 #app {
-  /* Full-bleed on any real phone, including ones whose "display size"
-     setting reports a wider logical viewport than the device's physical
-     size would suggest. Only a genuine tablet/desktop window gets the
-     centered-card treatment. */
-  max-width: 640px;
-  margin: 0 auto;
+  /* Always full-bleed. A pixel-width breakpoint can't reliably tell a
+     phone from a desktop window — a device's display-scaling/density
+     setting can make a real phone report a CSS viewport wider than any
+     sane breakpoint, which is exactly what was causing gutters on some
+     phones. So: no cap, ever. Fills the real device width 1:1. */
   min-height: 100vh;
   background: var(--board);
   display: flex;
@@ -339,7 +338,7 @@ label {
 
 .cta-tag {
   position: fixed;
-  right: calc(50% - 320px + var(--space-5));
+  right: var(--space-5);
   bottom: 88px;
   display: inline-flex; align-items: center; gap: 8px;
   padding: 0 20px 0 16px;
@@ -347,7 +346,6 @@ label {
   color: var(--tag-gold-ink); border: none; font-weight: 700; font-size: 14px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.45);
 }
-@media (max-width: 640px) { .cta-tag { right: var(--space-5); } }
 
 .bottom-nav {
   position: sticky; bottom: 0; display: flex;
