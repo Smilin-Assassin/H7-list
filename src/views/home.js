@@ -137,7 +137,7 @@ export function renderHome(currentUser) {
         </div>
         ${ledgerHtml()}
         <div class="chip-row">${chipsHtml()}</div>
-        <div class="content">${contentHtml()}</div>
+        <div class="content ruled-board">${contentHtml()}</div>
         <button type="button" class="cta-tag" aria-label="Add item" id="fab-add">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
           Add

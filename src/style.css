@@ -237,8 +237,13 @@ label {
   padding: 0 var(--space-6) 100px;
   display: flex;
   flex-direction: column;
-  /* The board is ruled even where nothing is written yet — empty
-     space reads as an unfilled board, never as a layout gap. */
+}
+
+/* Ruled-board texture: only the Duty Board and Cleared (archive) list
+   screens, where it reads as "an unfilled board". On a form or profile
+   screen it would run lines straight through labels and inputs instead,
+   so it's a separate modifier class, not part of .content itself. */
+.ruled-board {
   background-image: repeating-linear-gradient(
     to bottom,
     transparent,

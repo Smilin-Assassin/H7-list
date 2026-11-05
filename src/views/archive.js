@@ -77,7 +77,7 @@ export function renderArchive() {
           <h1>Cleared rounds</h1>
           <p class="subtitle">Completed boards &amp; settlements</p>
         </div>
-        <div class="content">${contentHtml()}</div>
+        <div class="content ruled-board">${contentHtml()}</div>
         ${bottomNavHtml("archive")}
       </div>
     `;
