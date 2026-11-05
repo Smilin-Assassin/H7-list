@@ -17,20 +17,28 @@ export function renderArchive() {
   }
 
   function summaryHtml(batch) {
-    const owing = batch.settlement.filter((s) => s.balance > 0.01);
-    const owed = batch.settlement.filter((s) => s.balance < -0.01);
-    if (owing.length === 0 && owed.length === 0) return "";
-    const creditor = owed[0];
+    // Plain totals, no computed "X owes Y" split — read straight off
+    // batch.items (doneBy + costEstimate per item) so it also works for
+    // rounds cleared before this changed.
+    const totalsByMember = {};
+    let total = 0;
+    (batch.items || []).forEach((i) => {
+      if (i.costEstimate) {
+        total += i.costEstimate;
+        if (i.doneBy) totalsByMember[i.doneBy] = (totalsByMember[i.doneBy] || 0) + i.costEstimate;
+      }
+    });
+    const paidRows = Object.entries(totalsByMember).sort((a, b) => b[1] - a[1]);
+    if (total === 0) return "";
     return `
       <div class="ledger-block">
-        <p class="ledger-title">Settlement — this round</p>
-        <div class="row"><span>Total spent</span><span class="amount">${formatCurrency(batch.total)}</span></div>
-        ${owing.map((s) => `
+        <p class="ledger-title">This round</p>
+        <div class="row"><span>Total spent</span><span class="amount">${formatCurrency(total)}</span></div>
+        ${paidRows.map(([uid, paid]) => `
           <div class="row">
-            <span>${escapeHtml(memberName(s.memberId))} owes${creditor ? ` ${escapeHtml(memberName(creditor.memberId))}` : ""}</span>
-            <span class="amount">${formatCurrency(s.balance)}</span>
+            <span>${escapeHtml(memberName(uid))} paid</span>
+            <span class="amount">${formatCurrency(paid)}</span>
           </div>`).join("")}
-        <p class="ledger-note">Split evenly across everyone who's joined — settle up in person.</p>
       </div>
     `;
   }

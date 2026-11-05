@@ -147,8 +147,10 @@ export async function requestHelp(itemId) {
 }
 
 // When every item in the current cycle is done, sweep them into a new
-// archive batch together, with a reimbursement summary computed from
-// who bought what. Called after any item is marked done.
+// archive batch together. No computed reimbursement/split here — just a
+// record of what was bought and who bought it; archive.js shows per-person
+// totals straight from `items` on read. Called after any item is marked
+// done.
 export async function archiveIfCycleComplete(allItems, members) {
   const current = allItems.filter((i) => !i.batchId);
   if (current.length === 0) return;
@@ -158,11 +160,9 @@ export async function archiveIfCycleComplete(allItems, members) {
   const batch = writeBatch(db);
   const batchRef = doc(batchesCol());
 
-  const totalsByMember = {};
+  let total = 0;
   const snapshotItems = current.map((i) => {
-    if (i.costEstimate) {
-      totalsByMember[i.doneBy] = (totalsByMember[i.doneBy] || 0) + i.costEstimate;
-    }
+    if (i.costEstimate) total += i.costEstimate;
     return {
       id: i.id,
       name: i.name,
@@ -172,22 +172,10 @@ export async function archiveIfCycleComplete(allItems, members) {
     };
   });
 
-  const memberIds = Object.keys(members);
-  const total = Object.values(totalsByMember).reduce((a, b) => a + b, 0);
-  const evenShare = memberIds.length > 0 ? total / memberIds.length : 0;
-  const settlement = memberIds.map((uid) => ({
-    memberId: uid,
-    paid: totalsByMember[uid] || 0,
-    // positive = this person owes the group; negative = should be reimbursed
-    balance: Math.round((evenShare - (totalsByMember[uid] || 0)) * 100) / 100,
-  }));
-
   batch.set(batchRef, {
     clearedAt: serverTimestamp(),
     items: snapshotItems,
     total,
-    evenShare: Math.round(evenShare * 100) / 100,
-    settlement,
   });
 
   current.forEach((i) => {
