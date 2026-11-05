@@ -464,6 +464,19 @@ label {
 }
 .modal-sheet.is-open { transform: translateY(0); }
 
+/* The sitewide thin scrollbar (above) is unobtrusive on a full-bleed
+   screen — it just reads as normal browser chrome hugging the device
+   edge. Inside the sheet it instead cuts a visible rail down its own
+   right edge, right next to the rounded corner and shadow, which reads
+   as a stray gap rather than a scrollbar. Hide it here specifically;
+   swiping still scrolls the content fine without it. */
+.modal-sheet .content {
+  scrollbar-width: none;
+}
+.modal-sheet .content::-webkit-scrollbar {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .modal-backdrop, .modal-sheet { transition: none; }
 }
