@@ -33,7 +33,11 @@ try {
   // Config not filled in yet — messaging just stays off until it is.
 }
 
-const CACHE_NAME = "h7-shell-v1";
+// The placeholder below is replaced with the deploy's git commit SHA by
+// the GitHub Actions workflow right before `firebase deploy`. That's what
+// makes every deploy count as a new cache: activate() below throws out
+// every cache that isn't this one, so a stale build can't linger.
+const CACHE_NAME = "h7-shell-__BUILD_ID__";
 const SHELL_FILES = [
   "/",
   "/index.html",
@@ -63,18 +67,18 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return; // never cache Firebase/CDN calls
 
+  // Network-first: while online, a reload always gets what's actually
+  // live, never last deploy's cached copy. The cache only kicks in when
+  // the network request fails outright — i.e. you're offline.
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const network = fetch(event.request)
-        .then((response) => {
-          if (response && response.ok) {
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
-          }
-          return response;
-        })
-        .catch(() => cached);
-      return cached || network;
-    }),
+    fetch(event.request)
+      .then((response) => {
+        if (response && response.ok) {
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request)),
   );
 });
 

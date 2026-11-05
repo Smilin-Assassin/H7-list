@@ -19,6 +19,12 @@ jobs:
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
+      # Stamp this deploy's commit SHA into the service worker's cache
+      # name, so every deploy evicts whatever the last one cached instead
+      # of a phone holding onto old files until it happens to notice.
+      - name: Stamp service worker cache version
+        run: sed -i "s/__BUILD_ID__/${GITHUB_SHA::7}/" sw.js
+
       # Cloud Functions (the push-notification fan-out in functions/) needs
       # Firebase's Blaze plan, which isn't turned on yet — see functions/README
       # or the main README's "About Cloud Messaging and cost" section. Once
