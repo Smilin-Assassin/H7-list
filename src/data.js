@@ -1,8 +1,8 @@
 // Firestore access layer. Everything lives under one household document
 // (households/h7) for now — see firebase-config.js HOUSEHOLD_ID.
 import {
-  db, doc, collection, onSnapshot, query, orderBy, addDoc, updateDoc,
-  getDoc, setDoc, writeBatch, serverTimestamp,
+  db, doc, collection, onSnapshot, query, orderBy, where, addDoc, updateDoc,
+  getDocs, getDoc, setDoc, writeBatch, serverTimestamp,
 } from "./firebase.js";
 import { HOUSEHOLD_ID } from "./firebase-config.js";
 
@@ -202,4 +202,16 @@ export function subscribeBatches(cb) {
   return onSnapshot(q, (snap) => {
     cb(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
   });
+}
+
+// Delete a cleared round entirely — for wiping out a test round, not an
+// everyday action. Removes the batch doc plus every item that was swept
+// into it (they're otherwise just orphaned "done" records sitting under
+// items/ forever with no screen that shows them again).
+export async function deleteBatch(batchId) {
+  const itemsSnap = await getDocs(query(itemsCol(), where("batchId", "==", batchId)));
+  const batch = writeBatch(db);
+  itemsSnap.forEach((d) => batch.delete(d.ref));
+  batch.delete(doc(batchesCol(), batchId));
+  await batch.commit();
 }

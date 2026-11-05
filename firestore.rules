@@ -29,13 +29,16 @@ service cloud.firestore {
         allow read: if isMember(householdId);
         allow create: if isMember(householdId) && request.resource.data.createdBy == request.auth.uid;
         allow update: if isMember(householdId);
-        allow delete: if false;
+        // Deleting an item only happens as part of deleting the whole
+        // cleared round it belongs to (data.js deleteBatch) — any
+        // member can do that, same as they can mark items done.
+        allow delete: if isMember(householdId);
       }
 
       match /batches/{batchId} {
         allow read: if isMember(householdId);
         allow create, update: if isMember(householdId);
-        allow delete: if false;
+        allow delete: if isMember(householdId);
       }
     }
   }
